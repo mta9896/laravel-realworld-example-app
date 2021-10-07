@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Constants\Credit;
 use Auth;
 use App\User;
 use App\Http\Requests\Api\LoginUser;
@@ -50,6 +51,7 @@ class AuthController extends ApiController
             'username' => $request->input('user.username'),
             'email' => $request->input('user.email'),
             'password' => bcrypt($request->input('user.password')),
+            'credit' => Credit::PRIMARY_CREDIT,
         ]);
 
         return $this->respondWithTransformer($user);
