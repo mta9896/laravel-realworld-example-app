@@ -72,6 +72,14 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany|\Illuminate\Database\Query\Builder
+     */
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class)->latest();
+    }
+
+    /**
      * Get all the articles of the following users.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
