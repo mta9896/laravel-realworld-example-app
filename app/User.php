@@ -2,16 +2,22 @@
 
 namespace App;
 
+use App\Constants\Credit;
+use App\Events\UserCreditLessThanBanLimit;
+use App\Events\UserCreditLessThanNotifyLimit;
+use App\Events\UserCreditUpdated;
 use App\RealWorld\Follow\Followable;
 use App\RealWorld\Favorite\HasFavorite;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Kleemans\AttributeEvents;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use Notifiable, Followable, HasFavorite;
+    use Notifiable, Followable, HasFavorite, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -30,6 +36,12 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+//    protected $dispatchesEvents = [
+//        'is_credit_less_than_notify_limit:true' => UserCreditLessThanNotifyLimit::class,
+//        'is_credit_less_than_ban_limit:true' => UserCreditLessThanBanLimit::class,
+//    ];
+
 
     /**
      * Set the password using bcrypt hash.
@@ -119,5 +131,21 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::updated(function($user) {
+            if ($user->getOriginal('credit') !== $user->credit) {
+                $primaryCredit = $user->getOriginal('credit');
+                $updatedCredit = $user->credit;
+                $user->syncOriginalAttribute('credit');
+
+                event(new UserCreditUpdated($user, $primaryCredit, $updatedCredit));
+            }
+
+        });
     }
 }
