@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Mail\TestMail;
+use App\Services\Strategy\ArticleCreditDecrease;
 use App\Tag;
 use App\Article;
 use App\RealWorld\Paginate\Paginate;
@@ -10,6 +12,8 @@ use App\Http\Requests\Api\CreateArticle;
 use App\Http\Requests\Api\UpdateArticle;
 use App\Http\Requests\Api\DeleteArticle;
 use App\RealWorld\Transformers\ArticleTransformer;
+use Illuminate\Contracts\Logging\Log;
+use Illuminate\Support\Facades\Mail;
 
 class ArticleController extends ApiController
 {
@@ -24,6 +28,7 @@ class ArticleController extends ApiController
 
         $this->middleware('auth.api')->except(['index', 'show']);
         $this->middleware('auth.api:optional')->only(['index', 'show']);
+        $this->middleware('user_activation')->only(['store']);
     }
 
     /**
@@ -65,6 +70,8 @@ class ArticleController extends ApiController
 
             $article->tags()->attach($tags);
         }
+
+        (new ArticleCreditDecrease($user))->handleUserCreditReduction();
 
         return $this->respondWithTransformer($article);
     }

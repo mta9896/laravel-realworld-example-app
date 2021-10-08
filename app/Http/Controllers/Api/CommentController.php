@@ -7,6 +7,7 @@ use App\Comment;
 use App\Http\Requests\Api\CreateComment;
 use App\Http\Requests\Api\DeleteComment;
 use App\RealWorld\Transformers\CommentTransformer;
+use App\Services\Strategy\CommentCreditDecrease;
 
 class CommentController extends ApiController
 {
@@ -21,6 +22,7 @@ class CommentController extends ApiController
 
         $this->middleware('auth.api')->except('index');
         $this->middleware('auth.api:optional')->only('index');
+        $this->middleware('user_activation')->only(['store']);
     }
 
     /**
@@ -45,10 +47,14 @@ class CommentController extends ApiController
      */
     public function store(CreateComment $request, Article $article)
     {
+        $user = auth()->user();
+
         $comment = $article->comments()->create([
             'body' => $request->input('comment.body'),
             'user_id' => auth()->id(),
         ]);
+
+        (new CommentCreditDecrease($user))->handleUserCreditReduction();
 
         return $this->respondWithTransformer($comment);
     }
