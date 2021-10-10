@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api;
 
+use App\Invoice;
+use App\User;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
@@ -97,5 +99,44 @@ class ArticleCreateTest extends TestCase
         $response = $this->postJson('/api/articles', []);
 
         $response->assertStatus(401);
+    }
+
+    /** @test */
+    public function it_decreases_user_credit_when_creating_article()
+    {
+        $initialCredit = $this->loggedInUser->credit;
+
+        $data = [
+            'article' => [
+                'title' => 'test title',
+                'description' => 'test description',
+                'body' => 'test body with random text',
+            ]
+        ];
+
+        $this->postJson('/api/articles', $data, $this->headers);
+        $user = User::find($this->loggedInUser->id);
+        $newCredit = $user->credit;
+
+        $this->assertEquals($newCredit, $initialCredit - 5000);
+    }
+
+    /** @test */
+    public function it_creates_invoice_when_creating_article()
+    {
+        $data = [
+            'article' => [
+                'title' => 'test title',
+                'description' => 'test description',
+                'body' => 'test body with random text',
+            ]
+        ];
+
+        $this->postJson('/api/articles', $data, $this->headers);
+        $invoice = Invoice::where('user_id', $this->loggedInUser->id)
+            ->where('amount', 5000)
+            ->first();
+
+        $this->assertNotNull($invoice);
     }
 }
