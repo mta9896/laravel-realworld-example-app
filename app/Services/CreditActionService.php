@@ -3,7 +3,6 @@
 
 namespace App\Services;
 
-
 use App\Constants\Credit;
 use App\Services\Notification\NotifyUserInterface;
 use App\User;
@@ -27,8 +26,13 @@ class CreditActionService
         if ($primaryCredit > Credit::NOTIFY_USER_CREDIT_THRESHOLD && $updatedCredit <= Credit::NOTIFY_USER_CREDIT_THRESHOLD) {
             $this->notifyUser->notify($user);
         } elseif ($primaryCredit > Credit::BAN_USER_CREDIT_THRESHOLD && $updatedCredit <= Credit::BAN_USER_CREDIT_THRESHOLD) {
-            $user->deactivated_at = Carbon::now();
-            $user->save();
+            $this->deactivateUser($user);
         }
+    }
+
+    private function deactivateUser(User $user)
+    {
+        $user->deactivated_at = Carbon::now();
+        $user->save();
     }
 }
