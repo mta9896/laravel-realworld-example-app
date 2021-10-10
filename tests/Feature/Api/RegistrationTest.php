@@ -96,4 +96,29 @@ class RegistrationTest extends TestCase
                 ]
             ]);
     }
+
+    /** @test */
+    public function it_returns_user_initial_credit_on_registration()
+    {
+        $data = [
+            'user' => [
+                'username' => 'test',
+                'email' => 'test@test.com',
+                'password' => 'secret',
+            ]
+        ];
+
+        $response = $this->postJson('/api/users', $data);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'user' => [
+                    'email' => 'test@test.com',
+                    'username' => 'test',
+                    'bio' => null,
+                    'image' => null,
+                    'credit' => 100000,
+                ]
+            ]);
+    }
 }
