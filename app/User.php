@@ -2,16 +2,12 @@
 
 namespace App;
 
-use App\Constants\Credit;
-use App\Events\UserCreditLessThanBanLimit;
-use App\Events\UserCreditLessThanNotifyLimit;
 use App\Events\UserCreditUpdated;
 use App\RealWorld\Follow\Followable;
 use App\RealWorld\Favorite\HasFavorite;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Kleemans\AttributeEvents;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -36,11 +32,6 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password', 'remember_token',
     ];
-
-//    protected $dispatchesEvents = [
-//        'is_credit_less_than_notify_limit:true' => UserCreditLessThanNotifyLimit::class,
-//        'is_credit_less_than_ban_limit:true' => UserCreditLessThanBanLimit::class,
-//    ];
 
 
     /**
