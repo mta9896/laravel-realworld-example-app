@@ -2,6 +2,9 @@
 
 namespace Tests\Feature\Api;
 
+use App\Comment;
+use App\Invoice;
+use App\User;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
@@ -130,5 +133,82 @@ class CommentTest extends TestCase
         $response = $this->deleteJson("/api/articles/somerandomslug/comments/999", [], $this->headers);
 
         $response->assertStatus(404);
+    }
+
+    /** @test */
+    public function credit_decreases_on_comment_create_when_more_than_5_comments()
+    {
+        $initialCredit = $this->loggedInUser->credit;
+
+        for ($count = 0; $count < 5; $count++) {
+            $this->article->comments()->create([
+                'body' => 'test comment',
+                'user_id' => $this->loggedInUser->id,
+            ]);
+        }
+
+        $data = [
+            'comment' => [
+                'body' => 'This is a comment'
+            ]
+        ];
+
+        $this->postJson("/api/articles/{$this->article->slug}/comments", $data, $this->headers);
+
+        $user = User::find($this->loggedInUser->id);
+        $newCredit = $user->credit;
+
+        $this->assertEquals($newCredit, $initialCredit - 5000);
+    }
+
+    /** @test */
+    public function credit_not_decreasing_on_comment_create_when_less_than_5_comments()
+    {
+        $initialCredit = $this->loggedInUser->credit;
+
+        for ($count = 0; $count < 2; $count++) {
+            $this->article->comments()->create([
+                'body' => 'test comment',
+                'user_id' => $this->loggedInUser->id,
+            ]);
+        }
+
+        $data = [
+            'comment' => [
+                'body' => 'This is a comment'
+            ]
+        ];
+
+        $this->postJson("/api/articles/{$this->article->slug}/comments", $data, $this->headers);
+
+        $user = User::find($this->loggedInUser->id);
+        $newCredit = $user->credit;
+
+        $this->assertEquals($newCredit, $initialCredit);
+    }
+
+    /** @test */
+    public function it_creates_invoice_when_charging_for_comment()
+    {
+        for ($count = 0; $count < 5; $count++) {
+            $this->article->comments()->create([
+                'body' => 'test comment',
+                'user_id' => $this->loggedInUser->id,
+            ]);
+        }
+
+        $data = [
+            'comment' => [
+                'body' => 'This is a comment'
+            ]
+        ];
+
+        $this->postJson("/api/articles/{$this->article->slug}/comments", $data, $this->headers);
+
+        $invoice = Invoice::where('user_id', $this->loggedInUser->id)
+            ->where('amount', 5000)
+            ->first();
+
+        $this->assertNotNull($invoice);
     }
 }
