@@ -7,7 +7,7 @@ use App\Comment;
 use App\Http\Requests\Api\CreateComment;
 use App\Http\Requests\Api\DeleteComment;
 use App\RealWorld\Transformers\CommentTransformer;
-use App\Services\Strategy\CommentCreditDecrease;
+use App\Services\Credit\CommentCreditDecrease;
 
 class CommentController extends ApiController
 {
