@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Services\Strategy;
+namespace App\Services\Credit;
 
 
 use App\Exceptions\NotEnoughCreditException;

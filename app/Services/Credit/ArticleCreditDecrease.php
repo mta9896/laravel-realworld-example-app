@@ -1,15 +1,14 @@
 <?php
 
 
-namespace App\Services\Strategy;
+namespace App\Services\Credit;
 
 
+use App\Constants\Credit;
 use App\User;
 
 class ArticleCreditDecrease extends DecreaseCredit
 {
-    const CREDIT_PER_ARTICLE = 5000;
-
     protected function shouldCreditBeReduced()
     {
         return true;
@@ -17,6 +16,6 @@ class ArticleCreditDecrease extends DecreaseCredit
 
     protected function getCreditReductionAmount()
     {
-        return self::CREDIT_PER_ARTICLE;
+        return Credit::CREDIT_PER_ARTICLE;
     }
 }

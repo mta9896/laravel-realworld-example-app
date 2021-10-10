@@ -1,23 +1,21 @@
 <?php
 
 
-namespace App\Services\Strategy;
+namespace App\Services\Credit;
 
 
-use App\User;
+use App\Constants\Credit;
 
 class CommentCreditDecrease extends DecreaseCredit
 {
 
-    const CREDIT_PER_COMMENT = 5000;
-
     protected function shouldCreditBeReduced()
     {
-        return $this->user->comments()->count() > 5;
+        return $this->user->comments()->count() > Credit::FREE_COMMENT_COUNT_LIMIT;
     }
 
     protected function getCreditReductionAmount()
     {
-        return self::CREDIT_PER_COMMENT;
+        return Credit::CREDIT_PER_COMMENT;
     }
 }

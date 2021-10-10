@@ -14,5 +14,9 @@ class Credit
 
     const BAN_USER_CREDIT_THRESHOLD = 0;
 
-    const DELETE_USER_ACCOUNT_AFTER_HOURS = 24;
+    const CREDIT_PER_COMMENT = 5000;
+
+    const CREDIT_PER_ARTICLE = 5000;
+
+    const FREE_COMMENT_COUNT_LIMIT = 5;
 }
